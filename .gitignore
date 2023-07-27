@@ -3,3 +3,4 @@ downloaded_images/
 
 # Ignore the credentials folder
 credentials/
+py-env/
