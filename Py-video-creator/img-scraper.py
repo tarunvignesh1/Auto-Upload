@@ -22,6 +22,7 @@ def download_high_resolution_images(url, output_folder):
 
     # Find all image tags in the HTML
     a_tags = soup.find_all('a')
+    # Just a variable to have a break before the website gets in redirect loop.
     count = 0
     for a_tag in a_tags:
         if 'href' in a_tag.attrs:
@@ -30,7 +31,11 @@ def download_high_resolution_images(url, output_folder):
                 count += 1
                 response_new = requests.get(href)
                 soup_new = BeautifulSoup(response_new.content,'html.parser')
+                # Used class as an identifier of the image source link as per the observed html structure of a specific website.
                 a_tags_new = soup_new.find_all('a', class_ ='btn btn-light download-item btn-lg btn-block')
+
+                # need to be modified according to respective site HTML structure.....
+
                 for a_tag2 in a_tags_new:
                     if 'href' in a_tag2.attrs:
                         href_new = a_tag2['href']
@@ -42,13 +47,12 @@ def download_high_resolution_images(url, output_folder):
 
 if __name__ == "__main__":
     website_url = argv[1]
-
-
     output_directory = "downloaded_images"
 
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
     download_high_resolution_images(website_url, output_directory)
+    # Used for turning multiple pages in the gallery of the website
     for pg in range(2,6):
             page = "?p="+str(pg)
             new_link = website_url+page
