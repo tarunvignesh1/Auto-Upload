@@ -1,0 +1,5 @@
+# Ignore the downloaded_images folder
+downloaded_images/
+
+# Ignore the credentials folder
+credentials/
