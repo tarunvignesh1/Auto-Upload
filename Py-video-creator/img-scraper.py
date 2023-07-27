@@ -1,6 +1,7 @@
 import os
 import requests
 from bs4 import BeautifulSoup
+from sys import argv
 
 def download_content_from_html(html, desired_file_location, filename=None):
     response = requests.get(html)
@@ -40,7 +41,7 @@ def download_high_resolution_images(url, output_folder):
 
 
 if __name__ == "__main__":
-    website_url = "https://wallpapers.com/anime-girl"
+    website_url = argv[1]
 
 
     output_directory = "downloaded_images"
