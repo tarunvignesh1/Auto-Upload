@@ -2,6 +2,7 @@ from pytube import Playlist, YouTube
 from sys import argv
 import re
 from pytube import Playlist
+import os
 
 def clean_filename(title):
     # Remove non-alphanumeric characters and spaces from the title
@@ -27,7 +28,7 @@ def download_playlist(playlist_url, output_folder):
                 # Print the video title
                 print(f"Downloading video: {video.title}")
 
-                # Choose the stream with the highest resolution (video only)
+                # Choose the stream with the highest resolution (video only) and MP4 format
                 video_stream = video.streams.filter(progressive=True, file_extension='mp4').\
                                order_by('resolution').desc().first()
 
@@ -36,8 +37,13 @@ def download_playlist(playlist_url, output_folder):
                     cleaned_title = clean_filename(video.title)
                     # Set the output path for the downloaded video
                     output_path = f"{output_folder}/{cleaned_title}.mp4"
-                    # Download the video in high resolution
-                    video_stream.download(output_folder, filename=cleaned_title)
+                    # Download the video in high resolution and MP4 format
+                    video_stream.download(output_folder)
+                    # Rename the downloaded file to have the desired filename
+                    downloaded_file_path = f"{output_folder}/{video_stream.default_filename}"
+                    new_file_path = f"{output_folder}/{cleaned_title}.mp4"
+                    if downloaded_file_path != new_file_path:
+                        os.rename(downloaded_file_path, new_file_path)
                     print(f"Downloaded video: {video.title}")
                 else:
                     print(f"No suitable video stream found for {video.title}. Skipping.")
