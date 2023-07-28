@@ -1,61 +1,49 @@
-from pytube import Playlist, YouTube
-from sys import argv
-import re
-from pytube import Playlist
 import os
+import sys
+import requests
+from pytube import YouTube
+import re
 
-def clean_filename(title):
-    # Remove non-alphanumeric characters and spaces from the title
-    cleaned_title = re.sub(r'[^\w\s]', '', title)
-    # Replace spaces with underscores
-    cleaned_title = cleaned_title.replace(' ', '_')
-    return cleaned_title
+def search_youtube_videos(search_query, num_videos):
+    search_url = f"https://www.youtube.com/results"
+    response = requests.get(search_url, params={"search_query": search_query})
+    video_ids = re.findall(r"watch\?v=(\S{11})", response.text)
 
-def download_playlist(playlist_url, output_folder):
-    try:
-        # Create a Playlist object with the URL of the YouTube playlist
-        playlist = Playlist(playlist_url)
+    video_urls = [f"https://www.youtube.com/watch?v={video_id}" for video_id in video_ids]
 
-        # Print the playlist title and number of videos in the playlist
-        print(f"Downloading playlist: {playlist.title}")
-        print(f"Number of videos in the playlist: {len(playlist.video_urls)}")
+    filtered_video_urls = []
+    for video_url in video_urls:
+        response = requests.get(video_url)
+        if "LIVE_STREAM_OFFLINE" not in response.text:
+            filtered_video_urls.append(video_url)
 
-        # Loop through all video URLs in the playlist
-        for video_url in playlist.video_urls:
-            try:
-                # Create a YouTube object with the video URL
-                video = YouTube(video_url)
-                # Print the video title
+    return filtered_video_urls[:num_videos]
+
+def download_videos(video_urls):
+    os.makedirs("downloaded_videos", exist_ok=True)
+
+    for video_url in video_urls:
+        try:
+            video = YouTube(video_url)
+            video_stream = video.streams.filter(file_extension='mp4').first()
+            if video_stream is not None:
                 print(f"Downloading video: {video.title}")
+                file_path = video_stream.download("downloaded_videos")
+                print(f"Downloaded: {video.title}")
 
-                # Choose the stream with the highest resolution (video only) and MP4 format
-                video_stream = video.streams.filter(progressive=True, file_extension='mp4').\
-                               order_by('resolution').desc().first()
-
-                if video_stream is not None:
-                    # Clean the video title to create a valid filename
-                    cleaned_title = clean_filename(video.title)
-                    # Set the output path for the downloaded video
-                    output_path = f"{output_folder}/{cleaned_title}.mp4"
-                    # Download the video in high resolution and MP4 format
-                    video_stream.download(output_folder)
-                    # Rename the downloaded file to have the desired filename
-                    downloaded_file_path = f"{output_folder}/{video_stream.default_filename}"
-                    new_file_path = f"{output_folder}/{cleaned_title}.mp4"
-                    if downloaded_file_path != new_file_path:
-                        os.rename(downloaded_file_path, new_file_path)
-                    print(f"Downloaded video: {video.title}")
-                else:
-                    print(f"No suitable video stream found for {video.title}. Skipping.")
-
-            except Exception as e:
-                print(f"Error downloading video: {e}")
-    except Exception as e:
-        print(f"Error loading playlist: {e}")
-
+        except Exception as e:
+            print(f"Error downloading video: {e}")
 
 if __name__ == "__main__":
-    playlist_url = argv[1]
-    output_folder = "downloaded_audios"
+    if len(sys.argv) != 3:
+        print("Usage: python youtube_search_and_download.py <SEARCH_TERM> <NUM_VIDEOS>")
+        sys.exit(1)
 
-    download_playlist(playlist_url, output_folder)
+    search_query = sys.argv[1] + " japanese lofi"
+    num_videos = int(sys.argv[2])
+
+    video_urls = search_youtube_videos(search_query, num_videos)
+    if not video_urls:
+        print("No videos found for the given search term.")
+    else:
+        download_videos(video_urls)

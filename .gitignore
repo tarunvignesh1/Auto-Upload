@@ -1,6 +1,7 @@
 # Ignore the downloaded_images folder
 downloaded_images/
 downloaded_audios/
+downloaded_videos/
 # Ignore the credentials folder
 credentials/
 py-env/
