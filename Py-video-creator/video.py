@@ -36,6 +36,7 @@ def image_reacts_to_audio(image_path, audio_path, output_path, duration):
 
     video.write_videofile(output_path, fps=30, codec='libx264')
 
+
 if __name__ == "__main__":
     image_path = "downloaded_images/anime-girl-crying-durimg-sunset-askqrywtt0uv372i.jpg"  # Replace with the actual path to your image
     audio_path = "downloaded_audios/Shinobi ☯ Japanese Lofi HipHop Mix.mp4"  # Replace with the actual path to your audio
