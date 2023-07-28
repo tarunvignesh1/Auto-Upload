@@ -1,48 +1,47 @@
+import os
+import moviepy.editor as mp
 import numpy as np
-from moviepy.editor import ImageClip, VideoFileClip, concatenate_videoclips
+from scipy.ndimage import zoom
 
-def create_visual_effect_image(image_path, audio_clip, duration):
-    image = ImageClip(image_path)
-    # Set the duration of the image to match the audio duration
-    image = image.set_duration(duration)
+def resize_image(img, new_size):
+    height_ratio = new_size[0] / img.shape[0]
+    width_ratio = new_size[1] / img.shape[1]
+    return zoom(img, (height_ratio, width_ratio, 1))
 
-    def apply_visual_effect(t):
-        # Calculate the audio amplitude at time 't'
-        amplitude = audio_clip.get_frame(t)[0]
+def image_reacts_to_audio(image_path, audio_path, output_path, duration):
+    # Load the image
+    image = mp.ImageClip(image_path).set_duration(duration)
 
-        # Scale the amplitude to the range [0, 255]
-        scaled_amplitude = int((amplitude + 60) * 255 / 60)
+    # Load the audio
+    audio = mp.AudioFileClip(audio_path)
+    audio_duration = min(duration, audio.duration)
 
-        # Apply the color effect based on the scaled amplitude
-        color = (255 - scaled_amplitude, scaled_amplitude, 128)
+    # Function to update the image's position based on audio amplitude
+    def update_image(t):
+        t = min(t, audio_duration)
+        amplitude = audio.get_frame(t)[0]
+        return image.set_position(("center", 0.5 + amplitude * 0.2), relative=True)
 
-        # Create an image with the applied color effect
-        visual_effect_image = image.copy().set_duration(0.1).set_pos(("center", "center")).set_opacity(0.8)
-        visual_effect_image = visual_effect_image.set_duration(image.duration)
+    # Create a video clip with the image reacting to audio
+    video = mp.VideoClip(lambda t: update_image(t).get_frame(t), duration=duration)
 
-        return visual_effect_image.on_color(color)
+    # Resize the video to 1080p (1920x1080) and render the video
+    new_size = (1080, 1920)
+    resized_image = resize_image(image.get_frame(0), new_size)
+    video = video.fl_image(lambda img: resized_image)
+    video = video.set_audio(audio)
 
-    # Apply the visual effect for the entire image duration
-    image_with_effect = image.fl(apply_visual_effect)
+    # Create the output directory if it doesn't exist
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    return image_with_effect
+    video.write_videofile(output_path, fps=30, codec='libx264')
 
+if __name__ == "__main__":
+    image_path = "downloaded_images/anime-girl-crying-durimg-sunset-askqrywtt0uv372i.jpg"  # Replace with the actual path to your image
+    audio_path = "downloaded_audios/Shinobi ☯ Japanese Lofi HipHop Mix.mp4"  # Replace with the actual path to your audio
+    output_path = "rendered_videos/output_video.mp4"
 
-from moviepy.editor import AudioFileClip
+    clip = mp.AudioFileClip(audio_path)
+    duration = clip.duration
 
-def create_audio_video(audio_path):
-    audio_clip = AudioFileClip(audio_path)
-    audio_video = audio_clip.to_ImageClip()
-    return audio_video
-
-def main(image_path, audio_path):
-    audio_clip = AudioFileClip(audio_path)
-    audio_duration = audio_clip.duration
-
-    image_with_effect = create_visual_effect_image(image_path, audio_clip, audio_duration)
-    audio_video = create_audio_video(audio_path)
-
-    final_video = concatenate_videoclips([image_with_effect, audio_video], method="compose")
-    final_video.write_videofile("output_video.mp4", codec="libx264")
-
-main("downloaded_images/cute-anime-characters-from-dungeon-master-qg24kv9b68fcyero.jpg",)
+    image_reacts_to_audio(image_path, audio_path, output_path, duration)

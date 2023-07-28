@@ -2,6 +2,8 @@
 downloaded_images/
 downloaded_audios/
 downloaded_videos/
+rendered_videos/
 # Ignore the credentials folder
 credentials/
 py-env/
+output_videoTEMP_MPY_wvf_snd.mp3
