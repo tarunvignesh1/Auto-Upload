@@ -8,7 +8,7 @@ def resize_image(img, new_size):
     width_ratio = new_size[1] / img.shape[1]
     return zoom(img, (height_ratio, width_ratio, 1))
 
-def image_reacts_to_audio(image_path, audio_path, output_path, duration):
+def video_creator(image_path, audio_path, output_path, duration):
     # Load the image
     image = mp.ImageClip(image_path).set_duration(duration)
 
@@ -37,12 +37,34 @@ def image_reacts_to_audio(image_path, audio_path, output_path, duration):
     video.write_videofile(output_path, fps=30, codec='libx264')
 
 
+def apply_audio_effect(clip, magnitude=10):
+    def audio_effect(gf, t):
+        frame, audio = gf(t)
+        audio_data = np.array(audio.to_soundarray())
+        strength = np.max(np.abs(audio_data))
+        shake_factor = magnitude * strength
+        return frame, None
+    
+    return clip.fl(lambda gf, t: audio_effect(gf, t))
+
 if __name__ == "__main__":
-    image_path = "downloaded_images/anime-girl-crying-durimg-sunset-askqrywtt0uv372i.jpg"  # Replace with the actual path to your image
-    audio_path = "downloaded_audios/Shinobi ☯ Japanese Lofi HipHop Mix.mp4"  # Replace with the actual path to your audio
+    image_folder = "downloaded_images"  # Replace with the actual path to your image
+    audio_folder = "downloaded_videos"  # Replace with the actual path to your audio
+
+    image_files = os.listdir(image_folder)
+    audio_files = os.listdir(audio_folder)
+
+    image_path = image_files[0]
+    audio_path = audio_files[0]
+
+
     output_path = "rendered_videos/output_video.mp4"
 
     clip = mp.AudioFileClip(audio_path)
     duration = clip.duration
 
-    image_reacts_to_audio(image_path, audio_path, output_path, duration)
+    video_creator(image_path, audio_path, output_path, duration)
+    output_path = apply_audio_effect(output_path)
+
+    os.remove(image_path)
+    os.remove(audio_path)
