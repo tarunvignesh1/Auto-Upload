@@ -1,12 +1,11 @@
 import os
 import moviepy.editor as mp
 import numpy as np
-from scipy.ndimage import zoom
 
 def resize_image(img, new_size):
     height_ratio = new_size[0] / img.shape[0]
     width_ratio = new_size[1] / img.shape[1]
-    return zoom(img, (height_ratio, width_ratio, 1))
+    return np.resize(img, (new_size[0], new_size[1], img.shape[2]))
 
 def video_creator(image_path, audio_path, output_path, duration):
     # Load the image
@@ -37,15 +36,7 @@ def video_creator(image_path, audio_path, output_path, duration):
     video.write_videofile(output_path, fps=30, codec='libx264')
 
 
-def apply_audio_effect(clip, magnitude=10):
-    def audio_effect(gf, t):
-        frame, audio = gf(t)
-        audio_data = np.array(audio.to_soundarray())
-        strength = np.max(np.abs(audio_data))
-        shake_factor = magnitude * strength
-        return frame, None
-    
-    return clip.fl(lambda gf, t: audio_effect(gf, t))
+
 
 if __name__ == "__main__":
     image_folder = "downloaded_images"  # Replace with the actual path to your image
@@ -54,9 +45,8 @@ if __name__ == "__main__":
     image_files = os.listdir(image_folder)
     audio_files = os.listdir(audio_folder)
 
-    image_path = image_files[0]
-    audio_path = audio_files[0]
-
+    image_path = os.path.join(image_folder, image_files[0])
+    audio_path = os.path.join(audio_folder, audio_files[0])
 
     output_path = "rendered_videos/output_video.mp4"
 
@@ -64,7 +54,4 @@ if __name__ == "__main__":
     duration = clip.duration
 
     video_creator(image_path, audio_path, output_path, duration)
-    output_path = apply_audio_effect(output_path)
-
-    os.remove(image_path)
-    os.remove(audio_path)
+    clip = mp.VideoFileClip(output_path)
