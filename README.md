@@ -8,11 +8,11 @@
 
 I have divided the Youtube Auto Upload project into multiple Sub modules to keep some track on it and be debug friendly.
 
--  [img-scraper](Py-Video-creator/img-scraper.py) -- this is used for scraping copyright free images from a specific site as explained in that note.
+-  [img-scraper](py-Video-creator/img-scraper.py) -- this is used for scraping copyright free images from a specific site as explained in that note.
 
-- [playlist-scraper](Py-Video-creator/playlist-scraper.py) -- Used to download a series of youtube playlist of lofi songs which are copyright free.
+- [playlist-scraper](py-Video-creator/playlist-scraper.py) -- Used to download a series of youtube playlist of lofi songs which are copyright free.
 
-- [Video-renderer](Py-video-creator/video-renderer.py) -- Used moviepy python lib to edit the videos with the scraped images and audio and editing them to a specific themed one , here it is a Lofi video.
+- [Video-renderer](py-video-creator/video-renderer.py) -- Used moviepy python lib to edit the videos with the scraped images and audio and editing them to a specific themed one , here it is a Lofi video.
 
 -  [video-uploader](video-uploader.py) -- Created to upload the video once the rendering has completed to a faceless Youtube channel.
 
