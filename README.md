@@ -16,10 +16,11 @@ I have divided the Youtube Auto Upload project into multiple Sub modules to keep
 
 -  [video-uploader](video-uploader.py) -- Created to upload the video once the rendering has completed to a faceless Youtube channel.
 
----
-	Note: These are linked with CLI arguments and timed in a specific manner such that it gives ample of time to scrape, render and upload, and can be sequenced using a shell script.
+_Note: These are linked with CLI arguments and timed in a specific manner such that
+ it gives ample of time to scrape, render and upload, and can be sequenced using a shell script._
 
 Citations:
 [1] https://github.com/ClarityCoders/AutoTube
 
-```PS: This is a public one so open to all improvements, correction and any kind of optimization on this repo is always welcomed.. :)```
+```PS: This is a public one so open to all improvements, correction and```
+	```any kind of optimization on this repo is always welcomed.. :)```
