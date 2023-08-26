@@ -23,7 +23,7 @@ def upload_video(video_path, title, description, tags):
             "tags": tags,
         },
         "status": {
-            "privacyStatus": "private",  # Set the privacy status of the video
+            "privacyStatus": "public",  # Set the privacy status of the video
         },
     }
 
